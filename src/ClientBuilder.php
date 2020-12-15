@@ -3,7 +3,6 @@
 namespace Softonic\OAuth2\Guzzle\Middleware;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use League\OAuth2\Client\Provider\AbstractProvider as OAuth2Provider;
@@ -20,8 +19,6 @@ class ClientBuilder
         $cacheHandler = new AccessTokenCacheHandler($cache);
 
         $stack = isset($guzzleOptions['handler']) ? $guzzleOptions['handler'] : HandlerStack::create();
-
-        $stack->setHandler(new CurlHandler());
 
         $stack = static::addHeaderMiddlewareToStack(
             $stack,
@@ -78,7 +75,7 @@ class ClientBuilder
         return $stack;
     }
 
-    protected static function mergeOptions(array $defaultOptions, array $options = []): array
+    protected static function mergeOptions(array $defaultOptions, array $options = [])
     {
         return array_merge($options, $defaultOptions);
     }
