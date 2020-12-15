@@ -22,7 +22,7 @@ class AddAuthorizationHeader
         $this->cacheHandler = $cacheHandler;
     }
 
-    public function __invoke(RequestInterface $request): RequestInterface
+    public function __invoke(RequestInterface $request)
     {
         $token = $this->cacheHandler->getTokenByProvider($this->provider, $this->config);
         if (false === $token) {
@@ -31,31 +31,33 @@ class AddAuthorizationHeader
             $this->cacheHandler->saveTokenByProvider($accessToken, $this->provider, $this->config);
         }
 
-        return $request->withHeader('Authorization', 'Bearer ' . $token);
+        return $request->withHeader('Authorization', 'Bearer '.$token);
     }
 
-    private function getAccessToken(): AccessToken
+    private function getAccessToken()
     {
         $options = $this->getOptions();
         $grantType = $this->getGrantType();
+
         return $this->provider->getAccessToken($grantType, $options);
     }
 
-    private function getGrantType(): string
+    private function getGrantType()
     {
         if (empty($this->config['grant_type'])) {
             throw new InvalidArgumentException('Config value `grant_type` needs to be specified.');
         }
+
         return $this->config['grant_type'];
     }
 
-    private function getOptions(): array
+    private function getOptions()
     {
         $options = [];
         if (!empty($this->config['scope'])) {
             $options['scope'] = $this->config['scope'];
         }
-      
+
         if (!empty($this->config['token_options'])) {
             $tokenOptions = $this->config['token_options'];
             foreach ($tokenOptions as $key => $value) {

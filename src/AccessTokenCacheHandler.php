@@ -20,11 +20,11 @@ class AccessTokenCacheHandler
 
     /**
      * @param OAuth2Provider $provider
-     * @param array          $options
-     *
-     * @throws InvalidArgumentException
+     * @param array $options
      *
      * @return string|bool False if no token can be found in cache, the token's value otherwise.
+     * @throws InvalidArgumentException
+     *
      */
     public function getTokenByProvider(OAuth2Provider $provider, array $options)
     {
@@ -33,10 +33,11 @@ class AccessTokenCacheHandler
         if ($cacheItem->isHit()) {
             return $cacheItem->get();
         }
+
         return false;
     }
 
-    public function saveTokenByProvider(AccessToken $accessToken, OAuth2Provider $provider, array $options): bool
+    public function saveTokenByProvider(AccessToken $accessToken, OAuth2Provider $provider, array $options)
     {
         $cacheKey = $this->getCacheKey($provider, $options);
         $cacheItem = $this->cache->getItem($cacheKey);
@@ -48,18 +49,24 @@ class AccessTokenCacheHandler
         $cacheItem->expiresAt(
             $expiration
         );
+
         return $this->cache->save($cacheItem);
     }
 
-    public function deleteItemByProvider(OAuth2Provider $provider, array $options): bool
+    public function deleteItemByProvider(OAuth2Provider $provider, array $options)
     {
         return $this->cache->deleteItem($this->getCacheKey($provider, $options));
     }
 
-    public function getCacheKey(OAuth2Provider $provider, array $options): string
+    public function getCacheKey(OAuth2Provider $provider, array $options)
     {
         parse_str(parse_url($provider->getAuthorizationUrl(), PHP_URL_QUERY), $query);
+
         return static::CACHE_KEY_PREFIX
-            . md5($provider->getBaseAuthorizationUrl() . ($query['client_id'] ?? '') . serialize($options));
+            .md5(
+                $provider->getBaseAuthorizationUrl().(isset($query['client_id']) ? $query['client_id'] : '').serialize(
+                    $options
+                )
+            );
     }
 }

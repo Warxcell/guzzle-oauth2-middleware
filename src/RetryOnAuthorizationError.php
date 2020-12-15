@@ -24,15 +24,17 @@ class RetryOnAuthorizationError
         RequestInterface $request,
         ResponseInterface $response = null,
         \Exception $exception = null
-    ): bool {
+    ) {
         if ($this->isUnauthorizedResponse($retries, $response)) {
             $this->cacheHandler->deleteItemByProvider($this->provider, $this->config);
+
             return true;
         }
+
         return false;
     }
 
-    private function isUnauthorizedResponse(int $retries, ResponseInterface $response = null)
+    private function isUnauthorizedResponse($retries, ResponseInterface $response = null)
     {
         return !empty($response) && $retries < 1 && $response->getStatusCode() === 401;
     }

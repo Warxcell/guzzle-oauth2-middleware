@@ -13,13 +13,13 @@ class ClientBuilder
 {
     public static function build(
         OAuth2Provider $oauthProvider,
-        array $tokenOptions,
+        $tokenOptions,
         Cache $cache,
-        array $guzzleOptions = null
-    ): Client {
+        $guzzleOptions = []
+    ) {
         $cacheHandler = new AccessTokenCacheHandler($cache);
 
-        $stack = $guzzleOptions['handler'] ?? HandlerStack::create();
+        $stack = isset($guzzleOptions['handler']) ? $guzzleOptions['handler'] : HandlerStack::create();
 
         $stack->setHandler(new CurlHandler());
 
@@ -49,7 +49,7 @@ class ClientBuilder
         OAuth2Provider $oauthProvider,
         array $tokenOptions,
         AccessTokenCacheHandler $cacheHandler
-    ): HandlerStack {
+    ) {
         $addAuthorizationHeader = new AddAuthorizationHeader(
             $oauthProvider,
             $tokenOptions,
@@ -57,6 +57,7 @@ class ClientBuilder
         );
 
         $stack->push(Middleware::mapRequest($addAuthorizationHeader));
+
         return $stack;
     }
 
@@ -65,7 +66,7 @@ class ClientBuilder
         OAuth2Provider $oauthProvider,
         array $tokenOptions,
         AccessTokenCacheHandler $cacheHandler
-    ): HandlerStack {
+    ) {
         $retryOnAuthorizationError = new RetryOnAuthorizationError(
             $oauthProvider,
             $tokenOptions,
@@ -73,12 +74,12 @@ class ClientBuilder
         );
 
         $stack->push(Middleware::retry($retryOnAuthorizationError));
+
         return $stack;
     }
 
-    protected static function mergeOptions(array $defaultOptions, array $options = null): array
+    protected static function mergeOptions(array $defaultOptions, array $options = []): array
     {
-        $options = $options ?? [];
         return array_merge($options, $defaultOptions);
     }
 }
