@@ -20,7 +20,7 @@ class RetryOnAuthorizationError
     }
 
     public function __invoke(
-        int $retries,
+        $retries,
         RequestInterface $request,
         ResponseInterface $response = null,
         \Exception $exception = null
